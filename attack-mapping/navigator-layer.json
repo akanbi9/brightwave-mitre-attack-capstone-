@@ -1,1 +1,236 @@
+```json
+{
+  "name": "Operation Nightfall - ATT&CK Navigator Layer",
+  "versions": {
+    "attack": "19.2",
+    "navigator": "4.9.0",
+    "layer": "4.5"
+  },
+  "domain": "enterprise-attack",
+  "description": "ATT&CK Navigator layer for the simulated Operation Nightfall incident at BrightWave Logistics Ltd. Techniques are mapped to synthetic evidence E-01 through E-15. Course-required tactic names are retained where they differ from the current ATT&CK taxonomy.",
+  "filters": {
+    "platforms": [
+      "Windows",
+      "Office 365",
+      "Network"
+    ]
+  },
+  "sorting": 3,
+  "layout": {
+    "layout": "side",
+    "showName": true,
+    "showID": true,
+    "showDescription": false,
+    "showTactic": true,
+    "showTechnique": true,
+    "showSubtechnique": true
+  },
+  "hideDisabled": false,
+  "techniques": [
+    {
+      "techniqueID": "T1589.003",
+      "tactic": "reconnaissance",
+      "score": 3,
+      "comment": "E-01: Employee names, job titles, and email patterns were publicly discoverable.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1591.004",
+      "tactic": "reconnaissance",
+      "score": 3,
+      "comment": "E-01: Organizational role information was publicly discoverable.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1583.001",
+      "tactic": "resource-development",
+      "score": 1,
+      "comment": "E-02: A new external domain similar to the company name was observed. The exact acquisition process is not confirmed.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1566",
+      "tactic": "initial-access",
+      "score": 2,
+      "comment": "E-02: A targeted message from a lookalike external domain was sent to a finance employee.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1078",
+      "tactic": "initial-access",
+      "score": 2,
+      "comment": "E-03: The finance account authenticated successfully after the suspicious message and was marked unusual.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1204",
+      "tactic": "execution",
+      "score": 1,
+      "comment": "E-03: The authentication followed the message, but user execution is not directly proven.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1059",
+      "tactic": "execution",
+      "score": 2,
+      "comment": "E-04: A scripting engine launched from an Office-related process.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1053.005",
+      "tactic": "persistence",
+      "score": 3,
+      "comment": "E-05: A new scheduled execution entry was configured to run when the user signed in.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1685",
+      "tactic": "defense-evasion",
+      "score": 2,
+      "comment": "E-06: A local protection setting was changed and later restored. Current ATT&CK taxonomy may place this behavior under Defense Impairment.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1078",
+      "tactic": "privilege-escalation",
+      "score": 1,
+      "comment": "E-07: A privileged account authenticated on the workstation outside the administrator's normal pattern. Unauthorized use is suspected but not proven.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1555",
+      "tactic": "credential-access",
+      "score": 3,
+      "comment": "E-08: Security tooling detected attempted access to stored credential material.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1087",
+      "tactic": "discovery",
+      "score": 3,
+      "comment": "E-09: The workstation queried users and accounts.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1069",
+      "tactic": "discovery",
+      "score": 3,
+      "comment": "E-09: The workstation queried groups and domain resources.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1018",
+      "tactic": "discovery",
+      "score": 3,
+      "comment": "E-09: The workstation queried nearby systems.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1135",
+      "tactic": "discovery",
+      "score": 3,
+      "comment": "E-09: The workstation queried shared folders and network resources.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1021",
+      "tactic": "lateral-movement",
+      "score": 2,
+      "comment": "E-10: The finance account connected to the file server using an unusual remote administration protocol.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1213",
+      "tactic": "collection",
+      "score": 3,
+      "comment": "E-11: Finance and customer export files were collected from organizational resources.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1074",
+      "tactic": "collection",
+      "score": 3,
+      "comment": "E-11: A large collection of files was copied into a temporary staging folder.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1560",
+      "tactic": "collection",
+      "score": 3,
+      "comment": "E-12: The staged files were compressed into an archive.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1071.001",
+      "tactic": "command-and-control",
+      "score": 2,
+      "comment": "E-13: The workstation made periodic encrypted web connections to a rare external domain.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1048",
+      "tactic": "exfiltration",
+      "score": 2,
+      "comment": "E-14: A large encrypted outbound transfer occurred to an unfamiliar external service. The exact transfer protocol and contents are unknown.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1486",
+      "tactic": "impact",
+      "score": 2,
+      "comment": "E-15: Shared documents became inaccessible and filenames changed. An encrypting or destructive mechanism requires forensic confirmation.",
+      "enabled": true
+    }
+  ],
+  "gradient": {
+    "colors": [
+      "#ffffff",
+      "#ffcc00",
+      "#ff6600"
+    ],
+    "minValue": 0,
+    "maxValue": 3
+  },
+  "legendItems": [
+    {
+      "label": "Observed",
+      "color": "#ff6600"
+    },
+    {
+      "label": "Suspected",
+      "color": "#ffcc00"
+    },
+    {
+      "label": "Not Observed",
+      "color": "#ffffff"
+    },
+    {
+      "label": "Priority Detection Gap",
+      "color": "#cc0000"
+    }
+  ],
+  "metadata": [
+    {
+      "name": "Project",
+      "value": "Operation Nightfall"
+    },
+    {
+      "name": "Organization",
+      "value": "BrightWave Logistics Ltd."
+    },
+    {
+      "name": "Evidence",
+      "value": "Synthetic evidence E-01 through E-15"
+    },
+    {
+      "name": "ATT&CK Version",
+      "value": "v19.2"
+    },
+    {
+      "name": "Date Consulted",
+      "value": "2026-09-19"
+    }
+  ]
+}
+```
 
