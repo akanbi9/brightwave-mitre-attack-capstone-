@@ -620,7 +620,7 @@ The evidence supports activity across several stages of the course's 14-tactic m
 
 ## Analytical Conclusion
 
-The evidence should be interpreted as a connected sequence rather than as fifteen isolated events. The strongest sequence is:
+The strongest sequence is:
 
 **Targeted activity → suspicious authentication → endpoint execution → persistence → credential-related activity → discovery → unusual file-server access → data staging → archive creation → periodic external communication → large outbound transfer → business disruption.**
 
