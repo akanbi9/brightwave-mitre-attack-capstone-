@@ -1,4 +1,4 @@
-```csv
+
 Technique ID,Technique,Behavior to Detect,Telemetry / Log Source,Current Coverage,Detection Idea,Evidence Reference,Priority
 T1078,Valid Accounts,Unusual authentication by a user or privileged account,Identity provider sign-in logs / VPN logs,Partial,Detect successful sign-ins that differ from the user's normal location device time or authentication pattern,E-03; E-07,High
 T1059,Command and Scripting Interpreter,Office or document application spawning a scripting or interpreter process,Endpoint process telemetry / EDR,Partial,Alert on rare or unexpected Office-to-script-engine process chains,E-04,High
@@ -15,5 +15,5 @@ T1560,Archive Collected Data,Large collections of files compressed into an archi
 T1071.001,Application Layer Protocol: Web Protocols,Periodic outbound encrypted web connections to rare external domains,Firewall / proxy / DNS logs / EDR network telemetry,Partial,Detect periodic connections from an endpoint to rare or newly observed external domains,E-13,High
 T1048,Exfiltration Over Alternative Protocol,Large encrypted outbound transfer to an unfamiliar external service,Firewall / proxy / network flow logs,Difficult,Detect unusually large outbound encrypted transfers and correlate them with recent staging or archive activity,E-14,Critical
 T1486,Data Encrypted for Impact,Large-scale file-access failures or abnormal filename changes,File-server audit logs / endpoint telemetry / user reports,Partial,Detect rapid changes to large numbers of shared files and correlate with the responsible endpoint or account,E-15,Critical
-```
+
 
