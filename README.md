@@ -3,17 +3,15 @@
 
 # Operation Nightfall: Investigating a Simulated Intrusion and Building ATT&CK-Based Detection Coverage
 
-**Student Name:** Abdullah Akanbi
+**Name:** Abdullah Akanbi
+
 **Project Type:** Individual Threat Analysis, SOC & Detection Engineering Capstone Project
+
 **Organization:** BrightWave Logistics Ltd. *(Simulated Organization)*
 
 ---
 
-## 1. Project Title and Student Name
-
 **Project Title:** Operation Nightfall: Investigating a Simulated Intrusion and Building ATT&CK-Based Detection Coverage
-
-**Student:** Abdullah Akanbi
 
 ---
 
