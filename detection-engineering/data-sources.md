@@ -1,720 +1,442 @@
-
-# Safe Detection Engineering
+# Detection Data Sources
 
 ## Operation Nightfall
 
-This document defines defensive detection use cases for the simulated **Operation Nightfall** incident at BrightWave Logistics Ltd.
+This identifies the telemetry and log sources required to support the defensive detections. 
 
-The analytics are designed for **synthetic or authorized security telemetry only**. They focus on identifying suspicious behavior and supporting defensive investigation.
-
-No payloads, exploit instructions, credential-dumping commands, ransomware code, or defense-disabling procedures are included.
+The sources are based on the simulated BrightWave Logistics Ltd. environment and are intended for **authorized or synthetic security monitoring**.
 
 ---
 
-## Detection 1 — Unusual Sign-In by a User or Privileged Account
+## 1. Identity Provider Logs
 
-**ATT&CK Technique:** T1078 — Valid Accounts
+**Examples:**
 
-### Data Source and Required Fields
+* Microsoft 365 / cloud identity logs
+* Identity provider authentication logs
+* MFA logs
+* Account-risk events
 
-* Identity provider sign-in logs
-* VPN authentication logs
-* Cloud authentication logs
-* User/account name
+**Useful fields:**
+
+* Username
+* Account type
 * Source IP
 * Device name
-* Authentication method
+* Location
 * Timestamp
-* Geographic location
+* Authentication method
+* Success/failure
 * Sign-in risk
-* Success/failure status
+* MFA result
 
-### Detection Logic
+**Supports:**
 
-```text
-IF
-    a successful authentication occurs
-AND
-    the device, location, time, or authentication pattern is unusual for the account
-THEN
-    generate an alert
-```
+* T1078 — Valid Accounts
+* Unusual user authentication
+* Privileged account monitoring
 
-For privileged accounts, apply a lower threshold because unexpected administrator authentication has greater security impact.
+**Incident evidence:**
 
-### Why It Matters
-
-Valid credentials can be used to access systems without immediately appearing as a failed-login attack.
-
-In Operation Nightfall:
-
-* E-03 showed an unusual successful authentication by the finance user.
-* E-07 showed a privileged account authenticating outside the administrator's normal pattern.
-
-### Expected False Positives
-
-* Administrator performing emergency maintenance
-* Employee travelling
-* New workstation
-* VPN connection
-* Approved remote work
-* Newly enrolled device
-
-### Tuning Ideas
-
-* Maintain approved administrator accounts and devices.
-* Establish normal login locations and times.
-* Exclude approved service accounts.
-* Increase sensitivity for privileged accounts.
-* Correlate authentication with endpoint and network events.
-
-### Severity
-
-**High**
-
-### Response Action
-
-1. Verify whether the authentication was legitimate.
-2. Review recent authentication activity.
-3. Review the affected device.
-4. Revoke suspicious sessions if unauthorized.
-5. Escalate if privileged access is involved.
+* E-03
+* E-07
 
 ---
 
-# Detection 2 — Office Application Spawning a Scripting Process
+## 2. Endpoint Detection and Response (EDR)
 
-**ATT&CK Technique:** T1059 — Command and Scripting Interpreter
+EDR provides visibility into activity occurring on Windows endpoints.
 
-### Data Source and Required Fields
+**Useful fields:**
 
-* Endpoint Detection and Response (EDR)
-* Windows process creation telemetry
+* Hostname
+* Username
 * Process name
 * Parent process
 * Child process
-* User
-* Device
-* Timestamp
 * Process path
+* Timestamp
+* Network connection
+* Security alert
+* File activity
 
-### Detection Logic
+**Supports:**
 
-```text
-IF
-    an Office or document application starts
-    a scripting or command interpreter process
-AND
-    the process relationship is uncommon in the environment
-THEN
-    generate an alert
-```
+* T1059 — Command and Scripting Interpreter
+* T1053.005 — Scheduled Task/Job
+* T1555 — Credentials from Password Stores
+* T1685 — Disable or Modify Tools
+* Discovery techniques
 
-Example process relationship:
+**Incident evidence:**
 
-```text
-Office application
-        ↓
-Scripting / command interpreter
-```
-
-The actual command content should not be required for the detection.
-
-### Why It Matters
-
-Office applications normally perform document-related activities. An unusual child process can indicate suspicious user-triggered execution.
-
-E-04 recorded a scripting engine launching from an Office-related process.
-
-### Expected False Positives
-
-* Approved macros
-* Automation software
-* Document-management systems
-* Administrative scripts
-* Software deployment tools
-
-### Tuning Ideas
-
-* Establish a baseline of normal Office child processes.
-* Allow approved applications and automation tools.
-* Alert more aggressively for user workstations.
-* Correlate with email and identity events.
-
-### Severity
-
-**High**
-
-### Response Action
-
-1. Investigate the process tree.
-2. Identify the logged-in user.
-3. Review the originating document or email.
-4. Check for related endpoint activity.
-5. Isolate the endpoint if additional suspicious behavior is confirmed.
+* E-04
+* E-05
+* E-06
+* E-08
+* E-09
 
 ---
 
-# Detection 3 — New Scheduled Persistence Artifact
+## 3. Windows Security Event Logs
 
-**ATT&CK Technique:** T1053.005 — Scheduled Task/Job: Scheduled Task
+Windows security logs provide information about authentication, account activity, and system events.
 
-### Data Source and Required Fields
+**Useful fields:**
 
-* Windows Task Scheduler logs
-* EDR
-* Windows event logs
+* Event ID
+* Username
+* Computer name
+* Source address
+* Logon type
+* Timestamp
+* Authentication result
+* Account used
+
+**Supports:**
+
+* Account authentication monitoring
+* Privileged account monitoring
+* Remote access detection
+* Account discovery investigations
+
+**Incident evidence:**
+
+* E-03
+* E-07
+* E-10
+
+---
+
+## 4. Task Scheduler Logs
+
+Task Scheduler telemetry can identify new or modified scheduled execution artifacts.
+
+**Useful fields:**
+
 * Task name
+* Task path
+* Creating account
 * Creation time
 * Modification time
-* Creating account
-* Executable or program reference
+* Trigger
 * Hostname
+* Associated program
 
-### Detection Logic
+**Supports:**
 
-```text
-IF
-    a new scheduled task is created or modified
-AND
-    the action is outside approved administrative activity
-THEN
-    generate an alert
-```
+* T1053.005 — Scheduled Task/Job: Scheduled Task
 
-Give higher priority to scheduled tasks created shortly after suspicious process execution.
+**Incident evidence:**
 
-### Why It Matters
-
-Scheduled execution can provide repeated execution when a user signs in or when a scheduled trigger occurs.
-
-E-05 recorded a new scheduled execution entry configured to run when the user signed in.
-
-### Expected False Positives
-
-* Software installation
-* Legitimate system maintenance
-* Enterprise software updates
-* IT administration
-* Approved endpoint-management tools
-
-### Tuning Ideas
-
-* Maintain an allowlist of approved software.
-* Monitor newly created tasks.
-* Track the creating account.
-* Correlate task creation with preceding endpoint events.
-
-### Severity
-
-**High**
-
-### Response Action
-
-1. Verify whether the task is authorized.
-2. Identify the creating account and process.
-3. Preserve relevant logs.
-4. Remove or disable the artifact only through approved incident-response procedures.
-5. Investigate related endpoint activity.
+* E-05
 
 ---
 
-# Detection 4 — Security or Logging Configuration Change
+## 5. Endpoint Security Logs
 
-**ATT&CK Technique:** T1685 — Disable or Modify Tools
+Security-product telemetry records changes and alerts involving endpoint protection.
 
-> **ATT&CK taxonomy note:** The current ATT&CK taxonomy may place related behavior under Defense Impairment. The course's 14-tactic structure uses the Defense Evasion category.
+**Useful fields:**
 
-### Data Source and Required Fields
-
-* Endpoint security logs
-* Windows event logs
-* EDR
-* Security configuration logs
-* User/account
-* Device
+* Alert ID
+* Alert type
+* Hostname
+* Username
+* Process
 * Timestamp
 * Configuration changed
-* Previous value
-* New value
-* Process responsible
-
-### Detection Logic
-
-```text
-IF
-    a security or monitoring configuration changes
-AND
-    the change is not associated with an approved administrative action
-THEN
-    generate an alert
-```
-
-### Why It Matters
-
-Unexpected security configuration changes may reduce visibility or protection on an endpoint.
-
-E-06 recorded a local protection setting being changed and later restored.
-
-### Expected False Positives
-
-* Approved security maintenance
-* Endpoint-management software
-* Security product updates
-* Troubleshooting by IT
-* Policy deployment
-
-### Tuning Ideas
-
-* Record approved maintenance windows.
-* Monitor changes made outside those windows.
-* Prioritize changes made by unusual accounts.
-* Correlate changes with process and authentication telemetry.
-
-### Severity
-
-**High**
-
-### Response Action
-
-1. Determine who made the change.
-2. Verify whether it was authorized.
-3. Review surrounding endpoint activity.
-4. Preserve relevant logs.
-5. Escalate if the change is associated with suspicious activity.
-
----
-
-# Detection 5 — Credential-Access Alert
-
-**ATT&CK Technique:** T1555 — Credentials from Password Stores
-
-### Data Source and Required Fields
-
-* EDR
-* Endpoint security alerts
-* Windows security telemetry
-* User
-* Hostname
-* Process
-* Alert type
-* Timestamp
+* Previous state
+* New state
 * Detection status
 
-### Detection Logic
+**Supports:**
 
-```text
-IF
-    endpoint security reports attempted access to
-    stored authentication-related material
-THEN
-    generate an alert
-AND
-    correlate with nearby authentication and process activity
-```
+* Security configuration monitoring
+* Credential-access detection
+* Endpoint investigation
 
-### Why It Matters
+**Incident evidence:**
 
-Credential-related activity can indicate an attempt to obtain authentication information that could enable further access.
-
-E-08 recorded a security alert indicating attempted access to stored credential material.
-
-The alert does **not** by itself prove that credentials were successfully obtained.
-
-### Expected False Positives
-
-* Password managers
-* Approved enterprise applications
-* Security software
-* Administrative tools
-* Browser operations
-
-### Tuning Ideas
-
-* Maintain approved application baselines.
-* Correlate with unusual process activity.
-* Prioritize activity involving privileged workstations.
-* Combine endpoint alerts with identity events.
-
-### Severity
-
-**High**
-
-### Response Action
-
-1. Investigate the alert and responsible process.
-2. Determine whether the activity was authorized.
-3. Review subsequent authentication activity.
-4. Protect potentially affected accounts.
-5. Escalate if privileged credentials may be involved.
+* E-06
+* E-08
 
 ---
 
-# Detection 6 — Discovery Burst from a User Workstation
+## 6. DNS Logs
 
-**ATT&CK Techniques:**
+DNS logs show domain lookups made by systems inside the organization.
 
-* T1087 — Account Discovery
-* T1069 — Permission Groups Discovery
-* T1018 — Remote System Discovery
-* T1135 — Network Share Discovery
+**Useful fields:**
 
-### Data Source and Required Fields
-
-* EDR
-* Windows security logs
-* DNS logs
-* Network telemetry
-* SMB/file-server logs
-* Source workstation
-* User
-* Destination
-* Query/event type
 * Timestamp
-* Event count
-
-### Detection Logic
-
-```text
-IF
-    a user workstation performs an unusually high volume
-    of account, group, system, or network-share discovery
-WITHIN
-    a short period
-THEN
-    generate an alert
-```
-
-### Why It Matters
-
-A burst of different discovery activities can indicate systematic information gathering about the internal environment.
-
-E-09 recorded queries involving users, groups, nearby systems, shared folders, and domain resources.
-
-### Expected False Positives
-
-* Network administrators
-* IT inventory systems
-* Monitoring tools
-* Asset-management software
-* Help-desk troubleshooting
-
-### Tuning Ideas
-
-* Create separate baselines for administrators and normal users.
-* Use event volume thresholds.
-* Correlate multiple discovery categories.
-* Exclude approved inventory systems.
-
-### Severity
-
-**Medium–High**
-
-### Response Action
-
-1. Identify the workstation and user.
-2. Determine whether the activity is expected.
-3. Review authentication and process activity.
-4. Investigate unusual destinations.
-5. Escalate when discovery is followed by remote access or data collection.
-
----
-
-# Detection 7 — Unexpected Remote Access to a Server
-
-**ATT&CK Technique:** T1021 — Remote Services
-
-### Data Source and Required Fields
-
-* Windows authentication logs
-* File-server logs
-* Network telemetry
-* VPN logs
+* Source hostname
 * Source IP
-* Source device
-* Destination server
-* Account
-* Protocol/service
-* Timestamp
+* Requested domain
+* Response
+* Destination IP
+* Query type
 
-### Detection Logic
+**Supports:**
 
-```text
-IF
-    a user account accesses a server remotely
-AND
-    the user or workstation does not normally perform that activity
-THEN
-    generate an alert
-```
+* Rare-domain detection
+* Internal discovery investigation
+* Suspicious external communication
 
-Increase priority when the destination is a sensitive server.
+**Incident evidence:**
 
-### Why It Matters
-
-Unexpected remote access can indicate unauthorized movement from a compromised workstation to another internal system.
-
-E-10 recorded the finance account connecting to the file server using a remote administration protocol not normally used by that employee.
-
-### Expected False Positives
-
-* IT support
-* Emergency administration
-* Server maintenance
-* Approved remote workers
-* Help-desk activity
-
-### Tuning Ideas
-
-* Maintain administrator-to-server access baselines.
-* Track normal remote-access relationships.
-* Prioritize sensitive servers.
-* Correlate with the source workstation's recent activity.
-
-### Severity
-
-**High**
-
-### Response Action
-
-1. Validate the account and source device.
-2. Review the server session.
-3. Check whether the access was authorized.
-4. Protect the account if unauthorized.
-5. Investigate the source workstation.
+* E-09
+* E-13
 
 ---
 
-# Detection 8 — Large or Unusual Data Staging and Compression
+## 7. Firewall Logs
 
-**ATT&CK Techniques:**
+Firewall telemetry records connections between internal systems and external destinations.
 
+**Useful fields:**
+
+* Timestamp
+* Source IP
+* Destination IP
+* Destination port
+* Protocol
+* Bytes sent
+* Bytes received
+* Action
+* Domain where available
+
+**Supports:**
+
+* Periodic outbound connection detection
+* Large outbound transfer detection
+* Network investigation
+
+**Incident evidence:**
+
+* E-13
+* E-14
+
+---
+
+## 8. Proxy Logs
+
+Web proxy logs provide additional visibility into outbound web traffic.
+
+**Useful fields:**
+
+* Username
+* Source device
+* Destination domain
+* URL/category where available
+* Timestamp
+* HTTP method
+* Response status
+* Bytes transferred
+
+**Supports:**
+
+* T1071.001 — Web Protocols
+* Rare-domain monitoring
+* Outbound transfer investigation
+
+**Incident evidence:**
+
+* E-13
+* E-14
+
+---
+
+## 9. Network Flow Telemetry
+
+Network-flow data provides metadata about communication without requiring inspection of the full content.
+
+**Useful fields:**
+
+* Source IP
+* Destination IP
+* Source port
+* Destination port
+* Protocol
+* Start time
+* End time
+* Bytes sent
+* Bytes received
+* Connection count
+
+**Supports:**
+
+* Periodic communication detection
+* Large outbound transfer detection
+* Internal discovery
+* Remote-service monitoring
+
+**Incident evidence:**
+
+* E-09
+* E-10
+* E-13
+* E-14
+
+---
+
+## 10. File-Server Audit Logs
+
+File-server telemetry records access to shared business files.
+
+**Useful fields:**
+
+* Username
+* Source workstation
+* File path
+* File name
+* Access type
+* Timestamp
+* File size
+* Operation
+* Success/failure
+
+**Supports:**
+
+* T1021 — Remote Services
 * T1074 — Data Staged
 * T1560 — Archive Collected Data
+* Impact monitoring
 
-### Data Source and Required Fields
+**Incident evidence:**
 
-* File-server audit logs
-* EDR
-* Filesystem telemetry
-* File access logs
-* File creation events
-* Username
+* E-10
+* E-11
+* E-12
+* E-15
+
+---
+
+## 11. File-System Telemetry
+
+File-system monitoring records changes to files and directories.
+
+**Useful fields:**
+
 * Hostname
+* Username
 * File path
+* File name
+* File extension
 * File size
-* Number of files
-* Archive creation event
-* Timestamp
+* Creation time
+* Modification time
+* Rename event
+* Delete event
 
-### Detection Logic
+**Supports:**
 
-```text
-IF
-    a user or workstation accesses an unusually large
-    number or volume of files
-AND
-    the files are copied to a temporary or staging location
-OR
-    a large archive is subsequently created
-THEN
-    generate an alert
-```
+* Data staging detection
+* Archive creation detection
+* Large-scale file-change detection
+* Impact monitoring
 
-### Why It Matters
+**Incident evidence:**
 
-Bulk collection followed by staging or compression can indicate preparation for unauthorized transfer.
-
-E-11 recorded a large collection of finance and customer export files being copied to a temporary staging folder.
-
-E-12 recorded the staged files being compressed into an archive.
-
-### Expected False Positives
-
-* Backup jobs
-* Data migration
-* Reporting
-* Approved exports
-* IT maintenance
-
-### Tuning Ideas
-
-* Baseline normal backup activity.
-* Monitor sensitive directories more closely.
-* Set different thresholds for finance, HR, and customer data.
-* Correlate staging with subsequent network transfers.
-
-### Severity
-
-**High**
-
-### Response Action
-
-1. Identify the account and workstation.
-2. Determine which files were involved.
-3. Preserve file and audit evidence.
-4. Investigate subsequent outbound connections.
-5. Escalate if sensitive data may have been transferred.
+* E-11
+* E-12
+* E-15
 
 ---
 
-# Detection 9 — Periodic Outbound Connections to a Rare Domain
+## 12. Email Gateway Logs
 
-**ATT&CK Technique:** T1071.001 — Application Layer Protocol: Web Protocols
+Email security telemetry provides visibility into suspicious or unusual messages.
 
-### Data Source and Required Fields
+**Useful fields:**
 
-* DNS logs
-* Firewall logs
-* Proxy logs
-* EDR network telemetry
-* Domain
-* Source host
-* Destination IP
+* Sender address
+* Sender domain
+* Recipient
 * Timestamp
-* Connection count
-* Connection interval
-* Domain age/reputation where available
+* Subject
+* Message ID
+* Domain reputation
+* Detection result
+* Delivery status
 
-### Detection Logic
+**Supports:**
 
-```text
-IF
-    a workstation repeatedly connects to the same
-    rare or newly observed external domain
-AT
-    relatively regular intervals
-THEN
-    generate an alert for investigation
-```
+* Suspicious email investigation
+* Phishing-related detection
+* Initial-access investigation
 
-Do not treat domain rarity alone as proof of malicious activity.
+**Incident evidence:**
 
-### Why It Matters
-
-Regular outbound communication to a rare external service can be useful for identifying potentially suspicious communication.
-
-E-13 recorded periodic encrypted web connections from the compromised workstation to a rare external domain.
-
-### Expected False Positives
-
-* Cloud applications
-* Software update services
-* SaaS platforms
-* Telemetry services
-* Newly introduced business services
-
-### Tuning Ideas
-
-* Maintain an approved-domain list.
-* Baseline common SaaS services.
-* Combine domain rarity with endpoint risk.
-* Correlate periodic connections with process and identity telemetry.
-
-### Severity
-
-**High**
-
-### Response Action
-
-1. Identify the process generating the connection.
-2. Validate the destination.
-3. Review DNS and proxy history.
-4. Investigate the endpoint for related activity.
-5. Block or restrict the destination only through approved defensive procedures when malicious activity is confirmed.
+* E-04
 
 ---
 
-# Detection 10 — Large Encrypted Outbound Transfer
+# Priority Telemetry
 
-**ATT&CK Technique:** T1048 — Exfiltration Over Alternative Protocol
+For Operation Nightfall, the most important telemetry sources are:
 
-### Data Source and Required Fields
+1. **Identity logs** — detect unusual account use.
+2. **EDR** — detect suspicious endpoint behavior.
+3. **File-server logs** — detect unauthorized access and data collection.
+4. **Firewall/proxy logs** — detect unusual external communication.
+5. **DNS logs** — identify unusual domain activity.
+6. **Email gateway logs** — investigate suspicious messages.
 
-* Firewall logs
-* Proxy logs
-* Network flow telemetry
-* DLP logs where available
-* Source host
-* Destination
-* Destination domain/IP
-* Bytes sent
-* Timestamp
-* Protocol
-* User
-* Session duration
+---
 
-### Detection Logic
+# Correlation Strategy
+
+Individual logs provide limited context. Combining multiple sources creates a stronger detection picture.
+
+Example:
 
 ```text
-IF
-    outbound encrypted traffic volume is significantly
-    above the workstation's normal baseline
-AND
-    the destination is unfamiliar or unusual
-THEN
-    generate an alert
+Email Gateway
+      ↓
+Unusual Identity Authentication
+      ↓
+EDR Process Activity
+      ↓
+Scheduled Task
+      ↓
+Credential-Access Alert
+      ↓
+Internal Discovery
+      ↓
+File-Server Access
+      ↓
+Data Staging
+      ↓
+Archive Creation
+      ↓
+Firewall / Proxy Connection
+      ↓
+Large Outbound Transfer
 ```
 
-Increase priority when the event occurs shortly after large-scale file staging or archive creation.
+This correlation approach helps to investigate the incident as a **sequence of related events** rather than treating each alert independently.
 
-### Why It Matters
+---
 
-E-14 recorded a large encrypted outbound transfer to an unfamiliar external service.
+# Data Retention and Quality Considerations
 
-The available evidence does not establish the exact contents of the transfer, so the detection should identify it as **potential unauthorized data movement**, not automatically confirmed exfiltration.
+Security telemetry should have sufficient retention to support incident investigation.
 
-### Expected False Positives
+Important considerations include:
 
-* Cloud backups
-* Large legitimate file uploads
-* Software distribution
-* Video or media services
-* Business cloud-storage applications
+* Consistent timestamps across systems.
+* Accurate hostname and username information.
+* Centralized log collection where possible.
+* Protection against unauthorized log modification.
+* Appropriate retention periods.
+* Monitoring for missing telemetry.
+* Regular validation that important data sources are reporting correctly
 
-### Tuning Ideas
+# Detection Engineering Goal
 
-* Establish normal outbound-volume baselines.
-* Monitor sensitive workstations more closely.
-* Maintain approved cloud-service destinations.
-* Correlate outbound volume with file staging and archive events.
-* Apply different thresholds to servers and user workstations.
+The main goal of these data sources is to give security analysts enough information to spot unusual activities, investigate alerts, understand what happened during an incident, and respond properly.
 
-### Severity
+No single data source can detect every type of attack. That is why effective security monitoring requires information from different areas, including endpoints, user accounts, servers, email systems, and network traffic. When these sources are used together, they provide a clearer picture of what is happening across the environment.
 
-**Critical**
 
-### Response Action
-
-1. Identify the source workstation and user.
-2. Review recent staging and archive activity.
-3. Investigate the destination.
-4. Preserve network and endpoint evidence.
-5. Escalate according to the organization's incident-response and data-breach procedures.
-
-## Key Detection Gaps
-
-The simulated incident highlights several areas requiring improved monitoring:
-
-1. Limited visibility into unusual authentication behavior.
-2. Incomplete endpoint process-chain detection.
-3. Insufficient monitoring of new persistence artifacts.
-4. Limited correlation between credential-access alerts and identity events.
-5. Weak visibility into unusual internal discovery.
-6. Limited detection of abnormal remote administration.
-7. Insufficient monitoring of bulk data staging.
-8. Limited correlation between staging and outbound network transfers.
-
-## Defensive Objective
-
-The goal of this detection program is to improve the organization's ability to:
-
-* Detect suspicious activity earlier.
-* Correlate events across identity, endpoint, server, and network telemetry.
-* Reduce false positives through environmental baselines.
-* Prioritize high-impact alerts.
-* Support authorized incident investigation.
-* Improve detection coverage against the behaviors observed in Operation Nightfall.
-
-```
-```
