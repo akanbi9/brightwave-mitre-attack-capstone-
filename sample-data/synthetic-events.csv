@@ -1,1 +1,19 @@
 
+event_id,timestamp,source,hostname,username,event_type,description,severity
+S-001,2026-09-19 08:15,Public OSINT,N/A,N/A,Reconnaissance,"Employee names, job titles, and email patterns are publicly discoverable.",Low
+S-002,2026-09-19 11:40,Email Gateway,MAIL-GW-01,finance.user,Targeted Email,"An external domain similar to the company name sends a targeted message to a finance employee.",High
+S-003,2026-09-19 11:44,Identity,IDP-01,finance.user,Unusual Authentication,"Finance user successfully authenticates after opening the suspicious message. Sign-in risk is marked unusual.",High
+S-004,2026-09-19 11:47,EDR,FIN-PC-01,finance.user,Process Activity,"A scripting engine launches from an Office-related process.",High
+S-005,2026-09-19 11:51,Task Scheduler,FIN-PC-01,finance.user,Scheduled Execution,"A new scheduled execution entry is configured to run when the user signs in.",High
+S-006,2026-09-19 12:03,Endpoint Security,FIN-PC-01,finance.user,Security Configuration Change,"A local protection setting is changed and later restored.",High
+S-007,2026-09-19 12:10,Identity / EDR,FIN-PC-01,admin.user,Privileged Authentication,"A privileged account authenticates on the workstation outside the administrator's normal pattern.",Critical
+S-008,2026-09-19 12:14,EDR,FIN-PC-01,finance.user,Credential Access Alert,"Security tooling reports an attempted access to stored credential material.",Critical
+S-009,2026-09-19 12:20,EDR / Network,FIN-PC-01,finance.user,Discovery Activity,"The workstation queries users, groups, nearby systems, shared folders, and domain resources.",Medium
+S-010,2026-09-19 12:31,File Server,FILE-SRV-01,finance.user,Remote Access,"The finance account connects to the file server using an unusual remote administration protocol.",High
+S-011,2026-09-19 12:42,File Server,FILE-SRV-01,finance.user,Data Staging,"Finance and customer export files are copied into a temporary staging folder.",Critical
+S-012,2026-09-19 12:49,File Server,FILE-SRV-01,finance.user,Archive Creation,"The staged files are compressed into an archive with a generic name.",High
+S-013,2026-09-19 13:05,Firewall,FIN-PC-01,finance.user,Periodic External Connection,"The workstation makes periodic encrypted web connections to a rare external domain.",High
+S-014,2026-09-19 14:18,Firewall / Proxy,FIN-PC-01,finance.user,Large Outbound Transfer,"A large encrypted outbound transfer occurs to an unfamiliar external service.",Critical
+S-015,2026-09-20 07:50,File Server / Users,FILE-SRV-01,N/A,Service Disruption,"Many shared documents cannot be opened and file names have changed, disrupting business operations.",Critical
+
+
