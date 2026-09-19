@@ -1,4 +1,4 @@
-# brightwave-mitre-attack-capstone-
+# brightwave-mitre-attack-capstone.
 
 
 # Operation Nightfall: Investigating a Simulated Intrusion and Building ATT&CK-Based Detection Coverage
